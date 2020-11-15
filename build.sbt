@@ -50,6 +50,14 @@ lazy val core = project
   .settings(commonSettings)
   .settings(name := "core")
   .settings(parallelExecution in Test := false)
+  .settings(test in assembly := {})
+  .settings(assemblyJarName in assembly := "fpinbo-api.jar")
+  .settings(assemblyMergeStrategy in assembly := {
+    case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") => MergeStrategy.singleOrError
+    case x =>
+      val oldStrategy = (assemblyMergeStrategy in assembly).value
+      oldStrategy(x)
+  })
 
 lazy val tests = project
   .in(file("tests"))
