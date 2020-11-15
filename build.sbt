@@ -48,15 +48,28 @@ lazy val commonSettings = Seq(
 lazy val core = project
   .in(file("core"))
   .settings(commonSettings)
-  .settings(name := "core")
+  .settings(name := "api")
   .settings(parallelExecution in Test := false)
   .settings(test in assembly := {})
-  .settings(assemblyJarName in assembly := "fpinbo-api.jar")
+  .settings(assemblyJarName in assembly := "fpinbo-rest-api.jar")
   .settings(assemblyMergeStrategy in assembly := {
     case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") => MergeStrategy.singleOrError
     case x =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
+  })
+  .enablePlugins(DockerPlugin)
+  .settings(dockerfile in docker := {
+    // The assembly task generates a fat JAR file
+    val artifact: File     = assembly.value
+    val artifactTargetPath = s"/app/${artifact.name}"
+
+    new Dockerfile {
+      from("openjdk:11-jre")
+      add(artifact, artifactTargetPath)
+      entryPoint("java", "-jar", artifactTargetPath)
+      expose(80)
+    }
   })
 
 lazy val tests = project
