@@ -33,4 +33,4 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_TOKEN }} # token is on "github secrets"
+          password: ${{ secrets.CR_TOKEN }} # token is on "github secrets"
