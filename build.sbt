@@ -17,7 +17,7 @@ val logbackVersion = "1.2.3"
 // General Settings
 inThisBuild(
   List(
-    organization := "dev.fpinbo",
+    organization := "fp-in-bo",
     developers := List(
       Developer("azanin", "Alessandro Zanin", "ale.zanin90@gmail.com", url("https://github.com/azanin"))
     ),
@@ -69,8 +69,29 @@ lazy val core = project
       add(artifact, artifactTargetPath)
       entryPoint("java", "-jar", artifactTargetPath)
       expose(80)
+      label("org.containers.image.source", "https://github.com/fp-in-bo/api")
     }
   })
+  .settings(
+    imageNames in docker := Seq(
+      // Sets the latest tag
+      ImageName(
+        namespace = Some(organization.value + "/api"),
+        repository = "fp-in-bo-api",
+        registry = Some("ghcr.io"),
+        tag = Some("latest")
+      ), // Sets a name with a tag that contains the project version
+      ImageName(
+        namespace = Some(organization.value + "/api"),
+        repository = "fp-in-bo-api",
+        registry = Some("ghcr.io"),
+        tag = Some("v" + version.value.replace('+', '-'))
+      )
+    )
+  )
+  .settings(
+    publish in docker := Some("Github container registry" at "https://ghcr.io")
+  )
 
 lazy val tests = project
   .in(file("tests"))
