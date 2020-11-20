@@ -14,6 +14,8 @@ val betterMonadicForV = "0.3.1"
 
 val logbackVersion = "1.2.3"
 
+val circeV = "0.13.0"
+
 // General Settings
 inThisBuild(
   List(
@@ -39,7 +41,9 @@ lazy val commonSettings = Seq(
     "org.http4s"                  %% "http4s-blaze-server"           % http4sV,
     "com.softwaremill.sttp.tapir" %% "tapir-core"                    % tapirV,
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"           % tapirV,
-    "ch.qos.logback"              % "logback-classic"                % logbackVersion % Runtime,
+    "com.softwaremill.sttp.tapir" %% "tapir-json-circe"              % tapirV,
+    "io.circe"                    %% "circe-generic"                 % circeV,
+    "ch.qos.logback"               % "logback-classic"               % logbackVersion % Runtime,
     "com.codecommit"              %% "cats-effect-testing-scalatest" % catsEffectScalaTestV
   )
 )
@@ -54,7 +58,7 @@ lazy val core = project
   .settings(assemblyJarName in assembly := "fpinbo-rest-api.jar")
   .settings(assemblyMergeStrategy in assembly := {
     case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") => MergeStrategy.singleOrError
-    case x =>
+    case x                                                                            =>
       val oldStrategy = (assemblyMergeStrategy in assembly).value
       oldStrategy(x)
   })

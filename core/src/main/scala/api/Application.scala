@@ -17,8 +17,8 @@ object Application extends IOApp {
 
     val tapirEndpoint  = endpoint.get.in("hello").in(query[String]("name")).out(stringBody)
     val http4sEndpoint = tapirEndpoint.toRoutes(name => IO(s"Hello, $name!".asRight[Unit]))
-    val router = Router(
-      "/api" -> http4sEndpoint
+    val router         = Router(
+      "/" -> http4sEndpoint
     ).orNotFound
 
     val loggedApp = Logger.httpApp(logHeaders = true, logBody = true)(router)
