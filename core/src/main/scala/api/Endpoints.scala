@@ -12,8 +12,11 @@ object Endpoints {
   private val baseEndpoint: Endpoint[Unit, Unit, Unit, Any] = endpoint
     .in("events")
 
-  val events: Endpoint[Unit, EventError, List[Event], Any] =
+  val events: Endpoint[(Option[Int], Int), EventError, (String, List[Event]), Any] =
     baseEndpoint
+      .in(query[Option[Int]]("startFrom"))
+      .in(query[Int]("limit"))
+      .out(header[String]("Link"))
       .out(jsonBody[List[Event]])
       .errorOut(jsonBody[EventError].description("unknown"))
 

@@ -16,6 +16,8 @@ val logbackVersion = "1.2.3"
 
 val circeV = "0.13.0"
 
+val dynamodbV = "1.11.905"
+
 // General Settings
 inThisBuild(
   List(
@@ -43,6 +45,7 @@ lazy val commonSettings = Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"           % tapirV,
     "com.softwaremill.sttp.tapir" %% "tapir-json-circe"              % tapirV,
     "io.circe"                    %% "circe-generic"                 % circeV,
+    "com.amazonaws"                % "aws-java-sdk-dynamodb"         % dynamodbV,
     "ch.qos.logback"               % "logback-classic"               % logbackVersion % Runtime,
     "com.codecommit"              %% "cats-effect-testing-scalatest" % catsEffectScalaTestV
   )
