@@ -26,7 +26,7 @@ class DynamoEventsService(private val client: AmazonDynamoDB) extends EventsServ
     IO {
       val result = client.scan(request)
       (
-        Option(result.getLastEvaluatedKey.get("id").getN),
+        Option(result.getLastEvaluatedKey).map(_.get("id")).map(_.getN),
         result.getItems.asScala.toList.map(v =>
           Event(
             v.get("id").getN.toInt,
@@ -44,20 +44,22 @@ class DynamoEventsService(private val client: AmazonDynamoDB) extends EventsServ
 
 object DynamoEventsService {
 
-  def make = Resource.liftF(
+  def make = Resource.make(
     IO(
-      Try(sys.env("DYNAMO_HOST"))
-        .fold(
-          _ => AmazonDynamoDBClientBuilder.defaultClient(),
-          host =>
-            AmazonDynamoDBClientBuilder
-              .standard()
-              .withCredentials(new EnvironmentVariableCredentialsProvider())
-              .withEndpointConfiguration(
-                new EndpointConfiguration(host, null)
-              )
-              .build()
-        )
+      new DynamoEventsService(
+        Try(sys.env("DYNAMO_HOST"))
+          .fold(
+            _ => AmazonDynamoDBClientBuilder.defaultClient(),
+            host =>
+              AmazonDynamoDBClientBuilder
+                .standard()
+                .withCredentials(new EnvironmentVariableCredentialsProvider())
+                .withEndpointConfiguration(
+                  new EndpointConfiguration(host, null)
+                )
+                .build()
+          )
+      )
     )
-  )
+  )((db: DynamoEventsService) => IO(db.client.shutdown()))
 }

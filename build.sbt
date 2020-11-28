@@ -16,7 +16,9 @@ val logbackVersion = "1.2.3"
 
 val circeV = "0.13.0"
 
-val dynamodbV = "1.11.905"
+val dynamodbV = "1.11.909"
+
+val testContainerV = "0.38.6"
 
 // General Settings
 inThisBuild(
@@ -38,16 +40,18 @@ lazy val commonSettings = Seq(
   addCompilerPlugin("org.typelevel" %% "kind-projector"     % kindProjectorV cross CrossVersion.full),
   addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % betterMonadicForV),
   libraryDependencies ++= Seq(
-    "org.typelevel"               %% "cats-effect"                   % catsV,
-    "org.http4s"                  %% "http4s-dsl"                    % http4sV,
-    "org.http4s"                  %% "http4s-blaze-server"           % http4sV,
-    "com.softwaremill.sttp.tapir" %% "tapir-core"                    % tapirV,
-    "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"           % tapirV,
-    "com.softwaremill.sttp.tapir" %% "tapir-json-circe"              % tapirV,
-    "io.circe"                    %% "circe-generic"                 % circeV,
-    "com.amazonaws"                % "aws-java-sdk-dynamodb"         % dynamodbV,
-    "ch.qos.logback"               % "logback-classic"               % logbackVersion % Runtime,
-    "com.codecommit"              %% "cats-effect-testing-scalatest" % catsEffectScalaTestV
+    "org.typelevel"               %% "cats-effect"                    % catsV,
+    "org.http4s"                  %% "http4s-dsl"                     % http4sV,
+    "org.http4s"                  %% "http4s-blaze-server"            % http4sV,
+    "com.softwaremill.sttp.tapir" %% "tapir-core"                     % tapirV,
+    "com.softwaremill.sttp.tapir" %% "tapir-http4s-server"            % tapirV,
+    "com.softwaremill.sttp.tapir" %% "tapir-json-circe"               % tapirV,
+    "io.circe"                    %% "circe-generic"                  % circeV,
+    "com.amazonaws"                % "aws-java-sdk-dynamodb"          % dynamodbV,
+    "ch.qos.logback"               % "logback-classic"                % logbackVersion % Runtime,
+    "com.codecommit"              %% "cats-effect-testing-scalatest"  % catsEffectScalaTestV,
+    "com.dimafeng"                %% "testcontainers-scala-dynalite"  % testContainerV,
+    "com.dimafeng"                %% "testcontainers-scala-scalatest" % testContainerV
   )
 )
 
@@ -67,17 +71,7 @@ lazy val core = project
   })
   .enablePlugins(DockerPlugin)
   .settings(dockerfile in docker := {
-    // The assembly task generates a fat JAR file
-    val artifact: File     = assembly.value
-    val artifactTargetPath = s"/app/${artifact.name}"
-
-    new Dockerfile {
-      from("openjdk:11-jre")
-      add(artifact, artifactTargetPath)
-      entryPoint("java", "-jar", artifactTargetPath)
-      expose(80)
-      label("org.containers.image.source", "https://github.com/fp-in-bo/api")
-    }
+    dockerFile(assembly.value)
   })
   .settings(
     imageNames in docker := Seq(
@@ -108,10 +102,34 @@ lazy val tests = project
   .settings(commonSettings)
   .settings(parallelExecution in IntegrationTest := false)
   .enablePlugins(NoPublishPlugin)
-  .settings(parallelExecution in Test := false)
+  .settings(fork in IntegrationTest := true)
+  .enablePlugins(DockerPlugin)
+  .settings(dockerfile in docker := {
+    dockerFile((assembly in core).value)
+  })
+  .settings(
+    envVars := Map(
+      "AWS_ACCESS_KEY_ID"     -> "fake",
+      "AWS_SECRET_ACCESS_KEY" -> "fake"
+    )
+  )
   .dependsOn(core)
 
 lazy val api = project
   .in(file("."))
   .enablePlugins(NoPublishPlugin)
   .aggregate(core, tests)
+
+addCommandAlias("integrationTests", ";project tests;docker;it:test")
+
+def dockerFile(dependsOn: File) = {
+  val artifactTargetPath = s"/app/${dependsOn.name}"
+
+  new Dockerfile {
+    from("openjdk:11-jre")
+    add(dependsOn, artifactTargetPath)
+    entryPoint("java", "-jar", artifactTargetPath)
+    expose(80)
+    label("org.containers.image.source", "https://github.com/fp-in-bo/api")
+  }
+}

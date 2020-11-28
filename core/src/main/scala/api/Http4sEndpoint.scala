@@ -12,7 +12,7 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
   timer: Timer[IO]
 ) {
 
-  val eventsHttp4s: HttpRoutes[IO] =
+  val events: HttpRoutes[IO] =
     Endpoints.events.toRoutes { input: (Option[Int], Int) =>
       eventsService
         .getEvents(input._1, input._2)
@@ -24,4 +24,10 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
         }
         .handleErrorWith(t => IO(UnknownEventError(t.getMessage).asLeft))
     }
+}
+
+object Http4sEndpoint {
+
+  def apply(eventsService: EventsService)(implicit cs: ContextShift[IO], timer: Timer[IO]): Http4sEndpoint =
+    new Http4sEndpoint(eventsService)
 }
