@@ -1,6 +1,6 @@
 val catsV = "2.2.0"
 
-val catsEffectV = "2.2.0"
+val catsEffectV = "2.3.0"
 
 val http4sV = "0.21.11"
 
