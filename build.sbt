@@ -51,7 +51,9 @@ lazy val commonSettings = Seq(
     "ch.qos.logback"               % "logback-classic"                % logbackVersion % Runtime,
     "com.codecommit"              %% "cats-effect-testing-scalatest"  % catsEffectScalaTestV,
     "com.dimafeng"                %% "testcontainers-scala-dynalite"  % testContainerV,
-    "com.dimafeng"                %% "testcontainers-scala-scalatest" % testContainerV
+    "com.dimafeng"                %% "testcontainers-scala-scalatest" % testContainerV,
+    "org.http4s"                  %% "http4s-blaze-client"            % http4sV,
+    "org.http4s"                  %% "http4s-circe"                   % http4sV
   )
 )
 
@@ -104,15 +106,7 @@ lazy val tests = project
   .enablePlugins(NoPublishPlugin)
   .settings(fork in IntegrationTest := true)
   .enablePlugins(DockerPlugin)
-  .settings(dockerfile in docker := {
-    dockerFile((assembly in core).value)
-  })
-  .settings(
-    envVars := Map(
-      "AWS_ACCESS_KEY_ID"     -> "fake",
-      "AWS_SECRET_ACCESS_KEY" -> "fake"
-    )
-  )
+  .settings(dockerfile in docker := dockerFile((assembly in core).value))
   .dependsOn(core)
 
 lazy val api = project

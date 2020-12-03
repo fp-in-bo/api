@@ -18,8 +18,8 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
         .getEvents(input._1, input._2)
         .map { case (token, events) =>
           val headerLinkValue = token.fold(
-            s"""<events?limit="${input._2}"; rel="last">"""
-          )(t => s"""<events?startFrom="$t"&limit="${input._2}"; rel="next">""")
+            s"""<events?limit=${input._2}; rel="last">"""
+          )(t => s"""<events?startFrom=$t&limit=${input._2}; rel="next">""")
           (headerLinkValue, events).asRight[EventError]
         }
         .handleErrorWith(t => IO(UnknownEventError(t.getMessage).asLeft))
