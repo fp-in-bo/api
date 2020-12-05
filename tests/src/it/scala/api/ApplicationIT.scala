@@ -2,6 +2,7 @@ package api
 
 import cats.effect.testing.scalatest.AsyncIOSpec
 import cats.effect.{ Blocker, IO, Resource }
+import cats.implicits._
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder
@@ -11,14 +12,13 @@ import io.circe.Json
 import org.http4s.circe.jsonDecoder
 import org.http4s.client.JavaNetClientBuilder
 import org.http4s.headers.Accept
-import org.http4s.{ DecodeFailure, Headers, MediaType, Request, Response, Uri, _ }
+import org.http4s.util.CaseInsensitiveString
+import org.http4s.{ DecodeFailure, Headers, MediaType, Request, Uri, _ }
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
+import org.testcontainers.containers.Network
 import org.testcontainers.containers.output.OutputFrame
 import org.testcontainers.containers.wait.strategy.Wait
-import org.testcontainers.containers.Network
-import cats.implicits._
-import org.http4s.util.CaseInsensitiveString
 
 import scala.jdk.CollectionConverters._
 
@@ -104,29 +104,56 @@ class ApplicationIT extends AsyncFreeSpec with ForAllTestContainer with Matchers
       } yield ()
     }.unsafeRunSync()
 
-  "get list of events" in {
+  "read all the events in a paginated fashion" in {
+
+    case class Res(headers: Headers, body: Either[DecodeFailure, Json])
 
     val hhtpClient = JavaNetClientBuilder[IO](blocker).create
 
-    val req: Request[IO] = Request(
-      uri = Uri.unsafeFromString(s"http://${apiContainer.host}:${apiContainer.mappedPort(80)}/events?limit=10"),
-      headers = Headers.of(Accept(MediaType.application.json))
-    )
+    def mkRequest(eventsPath: String): Request[IO] =
+      Request(
+        uri = Uri.unsafeFromString(s"http://${apiContainer.host}:${apiContainer.mappedPort(80)}/$eventsPath"),
+        headers = Headers.of(Accept(MediaType.application.json))
+      )
 
-    val actual: IO[(Response[IO], Either[DecodeFailure, Json])] =
-      hhtpClient.run(req).use(r => r.attemptAs[Json].value.map(j => (r, j)))
+    def parseLink(h: Header) = {
+      val strings  = h.value.split(";")
+      val nextLink = strings(0)
+      val rel      = strings(1)
 
-    val tuple = actual.unsafeRunSync()
+      if (rel.contains("next")) Some(nextLink.substring(1))
+      else None
+    }
 
-    val link              = tuple._1.headers.get(CaseInsensitiveString("Link")).map(h => h.value.split(";")(0).substring(1)).get
-    val req2: Request[IO] = Request(
-      uri = Uri.unsafeFromString(s"http://${apiContainer.host}:${apiContainer.mappedPort(80)}/$link"),
-      headers = Headers.of(Accept(MediaType.application.json))
-    )
+    def responseFor(req: Request[IO]): IO[(Res, Option[Request[IO]])] = {
+      val response: IO[(Headers, Either[DecodeFailure, Json])] =
+        hhtpClient.run(req).use(r => r.attemptAs[Json].value.map(j => (r.headers, j)))
 
-    hhtpClient.run(req2).use(r => r.attemptAs[Json].value.map(j => (r, j))).unsafeRunSync()
+      val res = response.map(t => Res(t._1, t._2))
 
-    assert(tuple._1.status == Status.Ok)
+      val link: IO[Option[String]] =
+        res.map(r =>
+          r.headers
+            .get(CaseInsensitiveString("Link"))
+            .flatMap(h => parseLink(h))
+        )
 
+      val nextRequest = link.map(_.fold[Option[Request[IO]]](None)(s => Some(mkRequest(s))))
+      res.product(nextRequest)
+    }
+
+    def callsStartingFrom(
+      request: Request[IO],
+      start: List[(Res, Option[Request[IO]])] = List()
+    ): IO[List[(Res, Option[Request[IO]])]] =
+      responseFor(request).flatMap {
+        case (res, Some(req)) => callsStartingFrom(req, start :+ ((res, Some(req))))
+        case (_, None)        => IO(start)
+      }
+
+    val result = callsStartingFrom(mkRequest("events?limit=10")).unsafeRunSync()
+
+    assert(result.size == 10)
   }
+
 }
