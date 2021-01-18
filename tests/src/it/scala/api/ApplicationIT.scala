@@ -78,9 +78,15 @@ class ApplicationIT extends AsyncFreeSpec with ForAllTestContainer with Matchers
       val createTable      = IO(
         client
           .createTable(
-            List(new AttributeDefinition("id", ScalarAttributeType.N)).asJava,
+            List(
+              new AttributeDefinition("community", ScalarAttributeType.S),
+              new AttributeDefinition("id", ScalarAttributeType.N)
+            ).asJava,
             "events",
-            List(new KeySchemaElement("id", KeyType.HASH)).asJava,
+            List(
+              new KeySchemaElement("community", KeyType.HASH),
+              new KeySchemaElement("id", KeyType.RANGE)
+            ).asJava,
             new ProvisionedThroughput(5, 5)
           )
       )
@@ -88,6 +94,7 @@ class ApplicationIT extends AsyncFreeSpec with ForAllTestContainer with Matchers
         client.putItem(
           "events",
           Map(
+            "community"   -> new AttributeValue().withS("fpinbo"),
             "id"          -> new AttributeValue().withN(id.toString),
             "title"       -> new AttributeValue().withS("a funny title"),
             "speaker"     -> new AttributeValue().withS("a funny speaker"),
@@ -104,11 +111,11 @@ class ApplicationIT extends AsyncFreeSpec with ForAllTestContainer with Matchers
       } yield ()
     }.unsafeRunSync()
 
-  "read all the events in a paginated fashion" in {
+  "read all the events in a paginated fashion for fpinbo" in {
 
     case class Res(headers: Headers, body: Either[DecodeFailure, Json])
 
-    val hhtpClient = JavaNetClientBuilder[IO](blocker).create
+    val httpClient = JavaNetClientBuilder[IO](blocker).create
 
     def mkRequest(eventsPath: String): Request[IO] =
       Request(
@@ -127,7 +134,7 @@ class ApplicationIT extends AsyncFreeSpec with ForAllTestContainer with Matchers
 
     def responseFor(req: Request[IO]): IO[(Res, Option[Request[IO]])] = {
       val response: IO[(Headers, Either[DecodeFailure, Json])] =
-        hhtpClient.run(req).use(r => r.attemptAs[Json].value.map(j => (r.headers, j)))
+        httpClient.run(req).use(r => r.attemptAs[Json].value.map(j => (r.headers, j)))
 
       val res = response.map(t => Res(t._1, t._2))
 
