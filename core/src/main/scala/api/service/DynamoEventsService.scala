@@ -30,9 +30,13 @@ class DynamoEventsService(private val client: AmazonDynamoDB) extends EventsServ
         .withKeyConditionExpression("#communityKey = :communityValue")
         .withExpressionAttributeNames(attributes.asJava)
         .withExpressionAttributeValues(values.asJava)
-        .addExclusiveStartKeyEntry("id", new AttributeValue().withN(key.toString))
-        .withLimit(limit)
-    )
+        .withExclusiveStartKey(
+          Map(
+            "community" -> new AttributeValue().withS("fpinbo"),
+            "id"        -> new AttributeValue().withN(key.toString)
+          ).asJava
+        )
+    ).withLimit(limit)
 
     IO {
       val result = client.query(request)
