@@ -2,7 +2,7 @@ name: Scala CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "*" ]
     tags: ["*"]
   pull_request:
     branches: [ main ]
@@ -24,7 +24,7 @@ jobs:
         run: sbt test
 
       - name: Run integration tests
-        run: sbt it:test
+        run: sbt integrationTests
 
   publish:
       needs: build
