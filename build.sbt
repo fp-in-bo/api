@@ -115,6 +115,7 @@ lazy val api = project
   .aggregate(core, tests)
 
 addCommandAlias("integrationTests", ";project tests;docker;it:test")
+addCommandAlias("dockerBuildAndPublish", ";project core;dockerBuildAndPush")
 
 def dockerFile(dependsOn: File) = {
   val artifactTargetPath = s"/app/${dependsOn.name}"

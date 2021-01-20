@@ -41,4 +41,4 @@ jobs:
             password: ${{ secrets.CR_TOKEN }} # token is on "github secrets"
 
         - name: Build and push container image
-          run: sbt dockerBuildAndPush
+          run: sbt dockerBuildAndPublish
