@@ -6,6 +6,7 @@ import sttp.tapir._
 import sttp.tapir.json.circe.jsonBody
 import io.circe.generic.auto._
 import sttp.model.StatusCode
+import sttp.tapir.generic.auto.schemaForCaseClass
 
 object Endpoints {
 
