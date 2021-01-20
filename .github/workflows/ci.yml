@@ -24,7 +24,7 @@ jobs:
         run: sbt test
 
       - name: Run integration tests
-        run: sbt it:test
+        run: sbt integrationTests
 
   publish:
       needs: build
