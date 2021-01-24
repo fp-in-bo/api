@@ -6,7 +6,7 @@ val http4sV = "0.21.15"
 
 val catsEffectScalaTestV = "0.5.0"
 
-val tapirV = "0.17.0"
+val tapirV = "0.17.7"
 
 val kindProjectorV = "0.11.3"
 
