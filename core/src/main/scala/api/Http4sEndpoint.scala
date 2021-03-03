@@ -24,6 +24,9 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
         }
         .handleErrorWith(t => IO(UnknownEventError(t.getMessage).asLeft))
     }
+
+  val event: HttpRoutes[IO] =
+    Endpoints.event.toRoutes { id: Int => eventsService.getEvent(id) }
 }
 
 object Http4sEndpoint {
