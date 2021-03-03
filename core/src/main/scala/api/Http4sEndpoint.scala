@@ -5,7 +5,7 @@ import api.service.EventsService
 import cats.effect.{ ContextShift, IO, Timer }
 import cats.implicits._
 import org.http4s.HttpRoutes
-import sttp.tapir.server.http4s.RichHttp4sHttpEndpoint
+import sttp.tapir.server.http4s.Http4sServerInterpreter
 
 class Http4sEndpoint(eventsService: EventsService)(implicit
   cs: ContextShift[IO],
@@ -13,7 +13,7 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
 ) {
 
   val events: HttpRoutes[IO] =
-    Endpoints.events.toRoutes { input: (Option[Int], Int) =>
+    Http4sServerInterpreter.toRoutes(Endpoints.events) { input: (Option[Int], Int) =>
       eventsService
         .getEvents(input._1, input._2)
         .map { case (token, events) =>
@@ -26,7 +26,7 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
     }
 
   val event: HttpRoutes[IO] =
-    Endpoints.event.toRoutes { id: Int => eventsService.getEvent(id) }
+    Http4sServerInterpreter.toRoutes(Endpoints.event) { id: Int => eventsService.getEvent(id) }
 }
 
 object Http4sEndpoint {
