@@ -3,11 +3,11 @@ package api.service
 import api.model.Event
 import api.model.response.{ EventError, EventNotFound }
 import cats.effect.{ IO, Resource }
+import cats.implicits._
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.dynamodbv2.model.{ AttributeValue, QueryRequest }
 import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBClientBuilder }
-import cats.implicits._
 
 import scala.jdk.CollectionConverters._
 import scala.util.Try
@@ -15,11 +15,17 @@ import scala.util.Try
 class DynamoEventsService(private val client: AmazonDynamoDB) extends EventsService {
 
   override def getEvent(id: Int): IO[Either[EventError, Event]] = {
-    val values     = Map(":idValue" -> new AttributeValue().withN(String.valueOf(id)))
-    val attributes = Map("#idKey" -> "id")
+    val values     = Map(
+      ":communityValue" -> new AttributeValue().withS("fpinbo"),
+      ":idValue"        -> new AttributeValue().withN(String.valueOf(id))
+    )
+    val attributes = Map(
+      "#communityKey" -> "community",
+      "#idKey"        -> "id"
+    )
 
     val request = new QueryRequest("events")
-      .withKeyConditionExpression("#idKey = :idValue")
+      .withKeyConditionExpression("#idKey = :idValue and #communityKey = :communityValue")
       .withExpressionAttributeNames(attributes.asJava)
       .withExpressionAttributeValues(values.asJava)
 

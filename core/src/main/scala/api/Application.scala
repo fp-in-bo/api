@@ -3,11 +3,12 @@ package api
 import api.service.DynamoEventsService
 import cats.data.Kleisli
 import cats.effect.{ ExitCode, IO, IOApp, Resource }
-import org.http4s.{ Request, Response }
-import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
+import cats.implicits._
+import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.middleware.Logger
+import org.http4s.{ Request, Response }
 
 import scala.concurrent.ExecutionContext.global
 
@@ -19,7 +20,7 @@ object Application extends IOApp {
       service: DynamoEventsService <- DynamoEventsService.make
       endpoints                    <- Resource.liftF(IO(Http4sEndpoint(service)))
     } yield Router(
-      "/" -> endpoints.events
+      "/" -> (endpoints.events <+> endpoints.event)
     ).orNotFound
 
     router.use { r: Kleisli[IO, Request[IO], Response[IO]] =>

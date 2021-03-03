@@ -166,8 +166,9 @@ class ApplicationIT extends AsyncFreeSpec with ForAllTestContainer with Matchers
   "read a single events for fpinbo" in {
     val httpClient = JavaNetClientBuilder[IO](blocker).create
 
-    val req = Request[IO](
-      uri = Uri.unsafeFromString(s"http://${apiContainer.host}:${apiContainer.mappedPort(80)}/event/42"),
+    val eventId = "42"
+    val req     = Request[IO](
+      uri = Uri.unsafeFromString(s"http://${apiContainer.host}:${apiContainer.mappedPort(80)}/events/$eventId"),
       headers = Headers.of(Accept(MediaType.application.json))
     )
 
