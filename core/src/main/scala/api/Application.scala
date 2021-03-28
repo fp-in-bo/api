@@ -18,7 +18,7 @@ object Application extends IOApp {
 
     val router = for {
       service: DynamoEventsService <- DynamoEventsService.make
-      endpoints                    <- Resource.liftF(IO(Http4sEndpoint(service)))
+      endpoints                    <- Resource.eval(IO(Http4sEndpoint(service)))
     } yield Router(
       "/" -> (endpoints.events <+> endpoints.event)
     ).orNotFound
