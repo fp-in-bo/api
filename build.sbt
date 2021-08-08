@@ -1,4 +1,4 @@
-val catsV = "2.5.2"
+val catsV = "2.5.3"
 
 val catsEffectV = "2.3.0"
 
