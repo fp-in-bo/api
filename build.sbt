@@ -18,7 +18,7 @@ val circeV = "0.14.1"
 
 val dynamodbV = "1.11.1034"
 
-val testContainerV = "0.39.5"
+val testContainerV = "0.39.6"
 
 // General Settings
 inThisBuild(
