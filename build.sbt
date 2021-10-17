@@ -8,7 +8,7 @@ val catsEffectScalaTestV = "0.5.4"
 
 val tapirV = "0.17.20"
 
-val kindProjectorV = "0.13.0"
+val kindProjectorV = "0.13.2"
 
 val betterMonadicForV = "0.3.1"
 
