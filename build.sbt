@@ -35,7 +35,7 @@ inThisBuild(
 
 // General Settings
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.6",
+  scalaVersion := "2.13.7",
   scalafmtOnCompile := true,
   addCompilerPlugin("org.typelevel" %% "kind-projector"     % kindProjectorV cross CrossVersion.full),
   addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % betterMonadicForV),
