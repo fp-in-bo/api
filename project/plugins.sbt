@@ -1,6 +1,6 @@
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.20")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.4")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.5")
 
 addSbtPlugin("io.chrisdavenport" % "sbt-no-publish" % "0.1.0")
 
