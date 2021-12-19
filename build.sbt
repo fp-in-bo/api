@@ -12,7 +12,7 @@ val kindProjectorV = "0.13.2"
 
 val betterMonadicForV = "0.3.1"
 
-val logbackVersion = "1.2.7"
+val logbackVersion = "1.2.9"
 
 val circeV = "0.14.1"
 
