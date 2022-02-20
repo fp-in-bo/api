@@ -2,7 +2,7 @@ val catsV = "2.5.4"
 
 val catsEffectV = "2.3.0"
 
-val http4sV = "0.23.10"
+val http4sV = "0.21.32"
 
 val catsEffectScalaTestV = "0.5.4"
 
@@ -18,7 +18,7 @@ val circeV = "0.14.1"
 
 val dynamodbV = "1.11.1034"
 
-val testContainerV = "0.40.0"
+val testContainerV = "0.40.1"
 
 // General Settings
 inThisBuild(
