@@ -2,7 +2,7 @@ val catsV = "2.5.4"
 
 val catsEffectV = "2.3.0"
 
-val http4sV = "0.21.32"
+val http4sV = "0.21.33"
 
 val catsEffectScalaTestV = "0.5.4"
 
