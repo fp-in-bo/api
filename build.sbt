@@ -14,7 +14,7 @@ val betterMonadicForV = "0.3.1"
 
 val logbackVersion = "1.2.11"
 
-val circeV = "0.14.2"
+val circeV = "0.14.5"
 
 val dynamodbV = "1.11.1034"
 
