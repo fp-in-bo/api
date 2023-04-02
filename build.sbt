@@ -12,13 +12,13 @@ val kindProjectorV = "0.13.2"
 
 val betterMonadicForV = "0.3.1"
 
-val logbackVersion = "1.2.11"
+val logbackVersion = "1.2.12"
 
 val circeV = "0.14.2"
 
 val dynamodbV = "1.11.1034"
 
-val testContainerV = "0.40.12"
+val testContainerV = "0.40.14"
 
 // General Settings
 inThisBuild(
