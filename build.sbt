@@ -16,7 +16,7 @@ val logbackVersion = "1.2.13"
 
 val circeV = "0.14.2"
 
-val dynamodbV = "1.11.1034"
+val dynamodbV = "1.12.739"
 
 val testContainerV = "0.41.3"
 
