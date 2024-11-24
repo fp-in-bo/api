@@ -2,14 +2,15 @@ package api
 
 import api.model.response.{ EventError, UnknownEventError }
 import api.service.EventsService
-import cats.effect.{ ContextShift, IO, Timer }
+import cats.effect.IO
 import cats.implicits._
 import org.http4s.HttpRoutes
 import sttp.tapir.server.http4s.Http4sServerInterpreter
+import cats.effect.Temporal
 
 class Http4sEndpoint(eventsService: EventsService)(implicit
   cs: ContextShift[IO],
-  timer: Timer[IO]
+  timer: Temporal[IO]
 ) {
 
   val events: HttpRoutes[IO] =
@@ -31,6 +32,6 @@ class Http4sEndpoint(eventsService: EventsService)(implicit
 
 object Http4sEndpoint {
 
-  def apply(eventsService: EventsService)(implicit cs: ContextShift[IO], timer: Timer[IO]): Http4sEndpoint =
+  def apply(eventsService: EventsService)(implicit timer: Temporal[IO]): Http4sEndpoint =
     new Http4sEndpoint(eventsService)
 }
