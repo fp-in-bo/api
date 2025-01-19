@@ -1,6 +1,6 @@
 addSbtPlugin("org.typelevel" % "sbt-tpolecat" % "0.5.1")
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.4")
 
 addSbtPlugin("io.chrisdavenport" % "sbt-no-publish" % "0.1.0")
 
